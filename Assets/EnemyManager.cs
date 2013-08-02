@@ -12,9 +12,9 @@ public class EnemyManager : MonoBehaviour {
   
   private const float InitialSpawnRatio = 0.25f;
   private const float FinalSpawnRatio = 0.95f;
-  private const float InitialSpeedMult = 1;
+  private const float InitialSpeedMult = 1;//1;
   private const float FinalSpeedMult = 5;
-  private const float InitialSpawnTime = 3;
+  private const float InitialSpawnTime = 3.5f;//3;
   private const float FinalSpawnTime = 1;
   
   //game vars
@@ -30,6 +30,8 @@ public class EnemyManager : MonoBehaviour {
   public Enemy enemyPrefab;
   private Queue<Enemy> activeEnemies;
   private Stack<Enemy> inactiveEnemies;
+
+  private Player player;
 
 	// Use this for initialization
 	void Start() {
@@ -47,11 +49,12 @@ public class EnemyManager : MonoBehaviour {
     for( int i = 0; i < NumEnemies; i++){
       inactiveEnemies.Push(
         (Enemy)Instantiate(enemyPrefab, new Vector3(0f,0f,-100f), Quaternion.identity));
-      inactiveEnemies.Peek().transform.parent = transform; //TODO not sure if needed
+      inactiveEnemies.Peek().transform.parent = transform; //TODO not sure if needed, I think this makes the enemies children of the manager
     }
     
     spawnTimer = gameObject.AddComponent<Timer>();
     rng = new System.Random();
+    player = gameObject.GetComponent<Player>();
 	}
 	
 	// Update is called once per frame
@@ -62,6 +65,7 @@ public class EnemyManager : MonoBehaviour {
         while (activeEnemies.Count > 0 &&
           activeEnemies.Peek().transform.position.x <= KillX) {
             Enemy e = activeEnemies.Dequeue();
+            player.handleEnemy(e);
             e.Deactivate();
             inactiveEnemies.Push(e);
         }
@@ -76,9 +80,15 @@ public class EnemyManager : MonoBehaviour {
 	}
   
   public void Restart() {
+    while (activeEnemies.Count > 0) {
+      Enemy e = activeEnemies.Dequeue();
+      e.Deactivate();
+      inactiveEnemies.Push(e);
+    }
+
     spawnTimer.Restart(0);
     spawnRatio = InitialSpawnRatio;
-    speedMult = 1;
+    speedMult = InitialSpeedMult;
     spawnTime = InitialSpawnTime;
   }
 

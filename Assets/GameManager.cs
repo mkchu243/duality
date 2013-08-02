@@ -3,9 +3,11 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour {
  
-  public enum GameState{restart, running, paused};
+  public enum GameState{restart, running, paused, gameOver};
   public static GameState state;
+
   private EnemyManager enemyManager;
+  private Player player;
 
   public const float MaxY = 18;
   public const float MinY = -18;
@@ -14,6 +16,10 @@ public class GameManager : MonoBehaviour {
 	void Start() {
     state = GameState.restart;
     enemyManager = gameObject.GetComponent<EnemyManager>();
+    player = gameObject.GetComponent<Player>();
+
+    Plane.InitStaticVars();
+    GUIManager.InitStaticVars();
 	}
 	
 	// Update is called once per frame
@@ -21,6 +27,7 @@ public class GameManager : MonoBehaviour {
     switch( state ){
     case GameState.restart:
       enemyManager.Restart();
+      player.Restart();
       state = GameState.running;
       break;
     //case GameState.running:

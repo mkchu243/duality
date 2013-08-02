@@ -12,7 +12,15 @@ public class Enemy : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-    transform.Translate(speed * Time.deltaTime, 0, 0);
+    switch (GameManager.state) {
+      case GameManager.GameState.running:
+        transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0), Space.World);
+        break;
+    }
+
+    Vector3 rotationVelocity = new Vector3(45, 90, 1);
+    transform.Rotate(rotationVelocity * Time.deltaTime);
+    //transform.RotateAround();//rotationVelocity);// * Time.deltaTime);
 	}
 
   void setModel() {

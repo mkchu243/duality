@@ -12,7 +12,7 @@ public class Timer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update() {
-    if(on){
+    if(on && GameManager.state == GameManager.GameState.running){
       time -= Time.deltaTime;
     }
 	}
