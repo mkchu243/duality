@@ -3,31 +3,26 @@ using System.Collections;
 using System;
 
 public class Player : MonoBehaviour {
+  private static Player instance;
   public GameObject laneprefab;
   private const float initialLife = 5;
   
   private GameObject[] lanes = new GameObject[Reference.NumLanes];
-  private float[] laneLimits = new float[Reference.NumLanes + 1];
   private float score;
   private float life;
 
   private Vector3 lastPos = Vector3.zero;
-
+ 
+  void Awake(){
+    Instance = this;
+  }
+  
 	// Use this for initialization
 	void Start() {
-    float diff = (GameManager.MaxY - GameManager.MinY) / Reference.NumLanes;
-    float currY = GameManager.MinY + diff / 2;
-    float laneLimitY = GameManager.MinY + diff;
-    laneLimits[0] = GameManager.MinY;
-
-    for (int i = 0; i < Reference.NumLanes; i++) {
+    for (int i = 0; i < GameManager.laneCenters.Length; i++) {
       lanes[i] = (GameObject) Instantiate(
-        laneprefab, new Vector3(0f, currY, 15), laneprefab.transform.rotation );
+        laneprefab, new Vector3(0f, GameManager.laneCenters[i], 15), laneprefab.transform.rotation );
       lanes[i].transform.parent = transform;
-
-      laneLimits[i+1] = laneLimitY;
-      laneLimitY += diff;
-      currY += diff;
     }
 
     Restart();
@@ -69,25 +64,12 @@ public class Player : MonoBehaviour {
 	}
 
   public void handleEnemy(Enemy enemy) {
-    int lane = determineLane(enemy.transform.position);
+    int lane = GameManager.DetermineLane(enemy.transform.position);
     if( lanes[lane].GetComponent<Plane>().Behavior == enemy.Behavior ){
       score += 100;
     } else {
       life--;
     }
-  }
-
-  private int determineLane(Vector3 point) {
-    int lane = -1;
-    for (int i = 0; i < Reference.NumLanes; i++) {
-      if (laneLimits[i] <= point.y && point.y < laneLimits[i + 1]) {
-        lane = i;
-        break;
-      }
-    }
-    if (lane == -1)
-      Debug.Log("wtf negative lane in determineLane " + point);
-    return lane;
   }
 
   //read the input and switch the lanes to the right behavior
@@ -115,8 +97,8 @@ public class Player : MonoBehaviour {
       b = Behavior.wave;
     }
 
-    int startLane = determineLane(start);
-    int endLane = determineLane(end);
+    int startLane = GameManager.DetermineLane(start);
+    int endLane = GameManager.DetermineLane(end);
     
     //make sure start lane is smaller one
     if (startLane > endLane) {
@@ -141,4 +123,6 @@ public class Player : MonoBehaviour {
   public float Life {
     get { return life; }
   }
+  
+  public static Player Instance{ get; private set; }
 }

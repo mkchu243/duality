@@ -13,7 +13,11 @@ public class Plane : MonoBehaviour {
     textures.Add(Behavior.particle, texture);
     textures.Add(Behavior.wave, texture2);
   }
-
+ 
+  void Awake(){
+    InitStaticVars();
+  }
+  
 	// Use this for initialization
 	void Start () {
   }

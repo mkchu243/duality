@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class Enemy : MonoBehaviour {
+  private int id;
   private float speed;
   private Behavior behavior;
 
@@ -12,9 +13,12 @@ public class Enemy : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-    switch (GameManager.state) {
+  	switch (GameManager.state) {
       case GameManager.GameState.running:
         transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0), Space.World);
+        if( transform.position.x <= EnemyManager.KillX ){
+          EnemyManager.Instance.RemoveEnemy(this);
+        }
         break;
     }
 

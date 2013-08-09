@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System;
 
 public class EnemyManager : MonoBehaviour {
+  private static EnemyManager instance;
  
   //game vars const
   private const float SpawnX = 30;
-  private const float KillX = -27;
+  public const float KillX = -27;
   
   private const int NumEnemies = 20;
   
   private const float InitialSpawnRatio = 0.25f;
   private const float FinalSpawnRatio = 0.95f;
-  private const float InitialSpeedMult = 1;//1;
+  private const float InitialSpeedMult = 11;//1;
   private const float FinalSpeedMult = 5;
-  private const float InitialSpawnTime = 3.5f;//3;
+  private const float InitialSpawnTime = 0.5f;//3;
   private const float FinalSpawnTime = 1;
   
   //game vars
@@ -25,51 +26,40 @@ public class EnemyManager : MonoBehaviour {
 
   //vars
   private System.Random rng;
-  private Vector3[] spawnY = new Vector3[Reference.NumLanes];
+  private Vector3[] spawnPoints = new Vector3[Reference.NumLanes];
   private Timer spawnTimer;
   public Enemy enemyPrefab;
-  private Queue<Enemy> activeEnemies;
+  private List<Enemy>[] activeEnemies;
   private Stack<Enemy> inactiveEnemies;
 
-  private Player player;
-
+  void Awake(){
+    Instance = this;
+  }
+  
 	// Use this for initialization
-	void Start() {
-	  float diff = (GameManager.MaxY - GameManager.MinY)/Reference.NumLanes;
-    float currY = GameManager.MinY + diff/2;
+  void Start() {
+    activeEnemies = new List<Enemy>[Reference.NumLanes];
+    inactiveEnemies = new Stack<Enemy>();
     
-    //calculate the spawn locations
-    for( int i = 0; i < Reference.NumLanes; i++ ){
-      spawnY[i] = new Vector3(SpawnX,currY,0);
-      currY += diff;
+    for( int i = 0; i < Reference.NumLanes; i++){
+      activeEnemies[i] = new List<Enemy>();
+      spawnPoints[i] = new Vector3(SpawnX, GameManager.laneCenters[i], 0);
     }
     
-    activeEnemies = new Queue<Enemy>();
-    inactiveEnemies = new Stack<Enemy>();
     for( int i = 0; i < NumEnemies; i++){
       inactiveEnemies.Push(
         (Enemy)Instantiate(enemyPrefab, new Vector3(0f,0f,-100f), Quaternion.identity));
       inactiveEnemies.Peek().transform.parent = transform; //TODO not sure if needed, I think this makes the enemies children of the manager
     }
-    
+
     spawnTimer = gameObject.AddComponent<Timer>();
     rng = new System.Random();
-    player = gameObject.GetComponent<Player>();
-	}
+  }
 	
 	// Update is called once per frame
-	void Update() {
+  void Update() {
     switch (GameManager.state){
       case GameManager.GameState.running:
-        //reclaim enemies
-        while (activeEnemies.Count > 0 &&
-          activeEnemies.Peek().transform.position.x <= KillX) {
-            Enemy e = activeEnemies.Dequeue();
-            player.handleEnemy(e);
-            e.Deactivate();
-            inactiveEnemies.Push(e);
-        }
-
         //spawn new enemies
         if (spawnTimer.time <= 0){
           SpawnEnemies();
@@ -77,13 +67,15 @@ public class EnemyManager : MonoBehaviour {
         }
         break;
     }
-	}
+  }
   
   public void Restart() {
-    while (activeEnemies.Count > 0) {
-      Enemy e = activeEnemies.Dequeue();
-      e.Deactivate();
-      inactiveEnemies.Push(e);
+    foreach (List<Enemy> l in activeEnemies){
+      foreach (Enemy e in l) {
+        e.Deactivate();
+        inactiveEnemies.Push(e);
+      }
+      l.Clear();
     }
 
     spawnTimer.Restart(0);
@@ -91,9 +83,16 @@ public class EnemyManager : MonoBehaviour {
     speedMult = InitialSpeedMult;
     spawnTime = InitialSpawnTime;
   }
+  
+  public void RemoveEnemy(Enemy e){
+    Player.Instance.handleEnemy(e);
+    inactiveEnemies.Push(e);
+    e.Deactivate();
+    activeEnemies[GameManager.DetermineLane(e.transform.position)].Remove(e);
+  }
 
   private void SpawnEnemies() {
-    for (int i = 0; i < Reference.NumLanes; i++) {
+    for (int lane = 0; lane < Reference.NumLanes; lane++) {
       if (inactiveEnemies.Count != 0 && spawnRatio < rng.NextDouble()) {
         Enemy e = inactiveEnemies.Pop();
 
@@ -105,9 +104,12 @@ public class EnemyManager : MonoBehaviour {
           b = Behavior.wave;
         }
 
-        e.Spawn(b, speedMult, spawnY[i]);
-        activeEnemies.Enqueue(e);
+        e.Spawn(b, speedMult, spawnPoints[lane]);
+        activeEnemies[lane].Add(e);
       }
     }
   }
+  
+  //setters and getters
+  public static EnemyManager Instance { get; private set; }
 }

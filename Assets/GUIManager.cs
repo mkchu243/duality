@@ -14,9 +14,9 @@ public class GUIManager : MonoBehaviour {
     centerText = "";
   }
 	
-	// Update is called once per frame
-	void Update () {
-	}
+  // Update is called once per frame
+  void Update () {
+  }
 
   void OnGUI() {
     if (GUI.Button(new Rect(Screen.width - 50, 10, textures["pause"].width, textures["pause"].height), textures["pause"])) {
@@ -49,11 +49,12 @@ public class GUIManager : MonoBehaviour {
     GUI.Label(new Rect(10, 10, 100, 20), "Score: " + player.Score); //TODO hard coded numbers
     GUI.Label(new Rect(10, 25, 100, 35), "Lives: " + player.Life);
     GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 100, 200, 200), centerText, centerTextStyle);
+    GUI.Label(new Rect(10, 50, 100, 100), textures["pause"]);
   }
 
   public static void InitStaticVars() {
-    Texture2D texture = Resources.Load("Textures/pause") as Texture2D;
     textures = new Dictionary<string, Texture>();
+    Texture2D texture = Resources.Load("Textures/pause") as Texture2D;
     textures.Add("pause", texture);
   }
 }
