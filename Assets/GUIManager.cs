@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+//test
 public class GUIManager : MonoBehaviour {
   private Player player;
   private static Dictionary<string, Texture2D> textures;
