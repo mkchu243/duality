@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public enum Behavior { particle, wave };
+public enum Behavior { particle, wave, nonExistant };
 
 public struct Attributes{
   public float speed;

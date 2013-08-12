@@ -111,5 +111,23 @@ public class EnemyManager : MonoBehaviour {
   }
   
   //setters and getters
+  public Behavior[] getAlerts(float cutoff){
+    Behavior[] ret = new Behavior[Reference.NumLanes];
+    for(int i = 0; i < activeEnemies.Length; i++){
+      int j;
+      for( j = 0; j < activeEnemies[i].Count; j++){
+        if( activeEnemies[i][j].transform.position.x >= cutoff ){
+          ret[i] = activeEnemies[i][j].Behavior;
+          break;
+        }
+      }
+      
+      if( j == activeEnemies[i].Count ){
+        ret[i] = Behavior.nonExistant;
+      }
+    }
+    return ret;
+  }
+	
   public static EnemyManager Instance { get; private set; }
 }

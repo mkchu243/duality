@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour {
   public enum GameState{restart, running, paused, gameOver};
   public static GameState state;
   public static float[] laneLimits = new float[Reference.NumLanes + 1]; //the Y lane limits
-  public static float[] laneCenters = new float[Reference.NumLanes];
+  public static float[] laneCenters = new float[Reference.NumLanes]; //these go from bottom to top
 
   public const float MaxY = 18;
   public const float MinY = -18;
@@ -30,7 +30,6 @@ public class GameManager : MonoBehaviour {
 	// Use this for initialization
   void Start() {
     state = GameState.restart;
-    GUIManager.InitStaticVars();
   }
 	
   // Update is called once per frame
